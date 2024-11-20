@@ -34,6 +34,12 @@ class Productos(models.Model):
     fecha_ingreso = models.DateTimeField(auto_now_add=True)
     fecha_elaboracion = models.DateField()
     fecha_vencimiento = models.DateField()
+    #creamos una funncion para actualizar el stock
+    #pasando como parametro la cantidad y guardando los cambios con save
+    def actualizar_stock (self, cantidad):
+        self.cantidad_stock -= cantidad # -= es una forma de operar (parecido a los contadores) siempre y cuadno sea una sola operacion contador = contador + 1
+        self.save()
+
     def __str__(self):
         return f"{self.nombre} ' ' {self.marca} "
     class Meta:
@@ -105,6 +111,7 @@ class Factura(models.Model):
         self.iva = self.subtotal * Decimal(0.15)
         self.total = self.subtotal + self.iva
         self.producto.cantidad_stock = int(self.producto.cantidad_stock) - int(self.cantidad)
+        self.producto.actualizar_stock(self.cantidad)
         super().save(*args, **kwargs)
 
     def __str__(self):

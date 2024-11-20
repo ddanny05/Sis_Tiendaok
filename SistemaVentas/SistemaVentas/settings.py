@@ -41,7 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'Ventasapp',
+    
 ]
 #PARA PERMITIR QUE FUNCIONEN LAS VENTANAS FLOTANTES 
 X_FRAME_OPTIONS = "SAMEORIGIN"
