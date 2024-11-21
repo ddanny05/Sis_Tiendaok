@@ -13,14 +13,12 @@ def Validacion_letras(value):
 validacion_especial = RegexValidator(
     regex= r'^[a-zA-Z\s]+$', #para establecer la expresion regular o cadena permitidos 
     message= 'el campo solo debe contener letras y espacios'
-
 )
 
 #validacion numeros letras y espacios
 validacion_especial2 = RegexValidator(
     regex= r'^[a-zA-Z0-9\s]+$', #para establecer la expresion regular o cadena permitidos 
     message= 'el campo solo debe contener letras y espacios'
-
 )
 
 #validacion numeros, letras y espacios y caracteres espcailes

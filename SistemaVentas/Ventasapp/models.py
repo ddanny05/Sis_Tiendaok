@@ -26,7 +26,7 @@ class Clientes(models.Model):
 
 class Productos(models.Model):
     codigo = models.CharField(primary_key=True, max_length=10, unique=True)
-    nombre = models.CharField(max_length=50, blank=False, verbose_name=' Nombre del producto : ') 
+    nombre = models.CharField(max_length=50, blank=False, verbose_name=' Nombre del producto  ') 
     marca = models.CharField(max_length=50, unique=True)
     caracteristicas_categoria = models.CharField(max_length=100, choices= CATEGORIAS)
     precio = models.DecimalField(max_digits=10, decimal_places=2, help_text='ingresa valores con decimales', verbose_name='Precio del producto : ')
@@ -76,7 +76,7 @@ class Proveedores (models.Model):
         db_table = 'Proveedores'
 
 class Empleados (models.Model):
-    cedula = models.CharField(primary_key=True, max_length=10, unique=True, verbose_name= 'Cedula del Empleado :')
+    cedula = models.CharField(primary_key=True, max_length=10, unique=True, verbose_name= 'Cedula del Empleado :',validators=[MinLengthValidator(10)])
     nombre = models.CharField(max_length=50, blank=False, verbose_name='Nombre del Empleado : ')
     apellido = models.CharField(max_length=50, blank=False)
     telefono = models.CharField(max_length=10)
