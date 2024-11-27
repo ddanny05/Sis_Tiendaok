@@ -1,6 +1,9 @@
+from typing import Any
 from django.db import models
 from .choices import CATEGORIAS
 from decimal import Decimal
+from django.core.exceptions import ValidationError
+from dateutil.relativedelta import relativedelta
 from django.core.validators import MinValueValidator, MaxValueValidator, MaxLengthValidator, MinLengthValidator
 from .validadores import validacion_numeros, Validacion_letras, validacion_especial,validacion_especial2,validacion_especial3
 
@@ -39,6 +42,22 @@ class Productos(models.Model):
     def actualizar_stock (self, cantidad):
         self.cantidad_stock -= cantidad # -= es una forma de operar (parecido a los contadores) siempre y cuadno sea una sola operacion contador = contador + 1
         self.save()
+#metodo utiliado para cuando se borra un producto
+    def sumar_stock (self, cantidad):
+        self.cantidad_stock += cantidad # -= es una forma de operar (parecido a los contadores) siempre y cuadno sea una sola operacion contador = contador + 1
+        self.save()  
+
+    """validador con metodo clean para fecha el metodo clean se debe ubicar por 
+    rapides en el modelo dado que actua con los atributos disponibles propios del modelo
+     y antes de guardar el registro este se utiliza para hacer multiples validaciones """
+    def clean (self):
+        if self.fecha_elaboracion >= self.fecha_vencimiento:
+            raise ValidationError('la fecha de elaboracion no puede ser igaul o superior a la de expiracion')
+        diferencia_fechas = relativedelta(self.fecha_vencimiento,self.fecha_elaboracion)
+        anios= diferencia_fechas.years
+        if anios >= 5:
+            raise ValidationError('revisar la fecha de vencimiento no puede superar los 5 años')
+        
 
     def __str__(self):
         return f"{self.nombre}  {self.marca} "
@@ -101,17 +120,56 @@ class Factura(models.Model):
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, editable=True, default=0)
     iva = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2, editable=False, default=0)
+    
+    VENDIDA = "V"
+    ANULADA = "A"
 
-        
+    ESTADOS = [
+    (VENDIDA, "Vendida"),
+    (ANULADA, "Anulada"), 
+    ]
+
+
+    estados = models.CharField(max_length=40, choices=ESTADOS)
+
+#el metodo clean sirve para realizar validaciones 
+# este metodo se debe usar para validar antes de guardar los registros
+    def clean (self):
+        if self.cantidad > self.producto.cantidad_stock:
+            raise ValidationError('no hay suficiente unidadades en stock')
+            
     def save(self, *args, **kwargs):
         """Sobrescribe el método save para calcular valores automáticamente."""
         self.subtotal = self.cantidad * self.producto.precio
         self.iva = self.subtotal * Decimal(0.15)
         self.total = self.subtotal + self.iva
-        self.producto.cantidad_stock = int(self.producto.cantidad_stock) - int(self.cantidad)
-        self.producto.actualizar_stock(self.cantidad)
+        if self.pk:
+            ultima_factura = Factura.objects.get(pk=self.pk)
+        
+            if ultima_factura.estados == self.VENDIDA and self.estados == self.ANULADA:
+                self.producto.sumar_stock(self.cantidad )
+            elif ultima_factura.estados == self.ANULADA and self.estados == self.VENDIDA:
+                 self.producto.actualizar_stock(self.cantidad)            
+        elif self.estados == self.ANULADA: 
+            print ("no sucedio nada")
+        
+           
         super().save(*args, **kwargs)
+        
+        """    
+         def delete(self, *args,**kwargs):
+        if self.pk:
+            ultima_factura = Factura.objects.get(pk=self.pk)
+                 
+            if ultima_factura.estados == self.VENDIDA or ultima_factura.estados == self.ANULADA:
+                self.producto.sumar_stock(self.cantidad )
+            elif ultima_factura.estados == self.ANULADA and self.estados == self.VENDIDA:
+                 self.producto.actualizar_stock(self.cantidad)            
+        elif self.estados == self.ANULADA: 
+            print ("no sucedio nada")
 
+        super().delete(*args, **kwargs)
+"""
     def __str__(self):
         return f"Factura {self.codigo_factura} - Cliente: {self.cliente.nombre} - Total: ${self.total}"
 

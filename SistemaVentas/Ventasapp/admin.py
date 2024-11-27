@@ -1,4 +1,6 @@
+from typing import Any
 from django.contrib import admin
+from django.http import HttpRequest
 from .models import Clientes,Empleados,Factura,Productos,Proveedores,Empresas
 # Register your models here.
 
@@ -21,8 +23,12 @@ class ProductosAdmin(admin.ModelAdmin):
 
 @admin.register (Factura)
 class FacturaAdmin(admin.ModelAdmin):
-    list_display = ('codigo_factura','fecha_factura','cliente', 'empleado','producto','cantidad','total')
-
+    list_display = ('codigo_factura','fecha_factura','cliente', 'empleado','producto','cantidad','subtotal','total')
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return ('codigo_factura','fecha_factura',' cliente','producto','cantidad','total','subtotal','empleado','iva')
+        return ()
+    
 @admin.register (Proveedores)
 class ProveedoresAdmin(admin.ModelAdmin):
     list_display = ('cedula','nombre','apellido') 
@@ -30,7 +36,7 @@ class ProveedoresAdmin(admin.ModelAdmin):
 @admin.register (Empresas)
 class EmpresasAdmin(admin.ModelAdmin):
     list_display = ('ruc','nombre','telefono')  
-     
-     
+
+
     
     
