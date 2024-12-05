@@ -6,3 +6,8 @@ CATEGORIAS = [
     ("Varios", "Varios"),
 
 ]
+METODOS_PAGO = [
+    ('Efectivo', 'Efectivo'),
+    ('Tarjeta de Crédito', 'Tarjeta de Crédito'),
+    ('Transferencia Bancaria', 'Transferencia Bancaria')
+]
